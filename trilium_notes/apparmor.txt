@@ -1,0 +1,57 @@
+#include <tunables/global>
+
+profile trilium_notes flags=(attach_disconnected,mediate_deleted) {
+  #include <abstractions/base>
+
+  # Capabilities
+  file,
+  signal (send) set=(kill,term,int,hup,cont),
+
+  # S6-Overlay (kept for compatibility with Home Assistant base images)
+  /init ix,
+  /bin/** ix,
+  /usr/bin/** ix,
+  /run/{s6,s6-rc*,service}/** ix,
+  /package/** ix,
+  /command/** ix,
+  /etc/services.d/** rwix,
+  /etc/cont-init.d/** rwix,
+  /etc/cont-finish.d/** rwix,
+  /run/{,**} rwk,
+  /dev/tty rw,
+
+  # Bashio (kept for compatibility with Home Assistant base images)
+  /usr/lib/bashio/** ix,
+  /tmp/** rwk,
+
+  # Add-on entrypoint and options
+  /run.sh ix,
+  /data/** rw,
+
+  # Upstream Trilium image paths.
+  /usr/local/bin/docker-entrypoint.sh ix,
+  /usr/src/app/start-docker.sh ix,
+  /usr/src/app/** r,
+  /usr/src/app/node_modules/.bin/** ix,
+  /home/node/ r,
+
+  # Node.js runtime and shell used by the upstream entrypoint
+  /usr/local/bin/node ix,
+  /usr/bin/ln ix,
+  /usr/bin/rm ix,
+  /bin/bash rix,
+  /bin/sh rix,
+  /bin/echo ix,
+  /bin/cat ix,
+  /bin/chown ix,
+  /bin/id ix,
+  /etc/passwd r,
+  /etc/group r,
+
+  # Allow the upstream start script to drop privileges to the 'node' user
+  capability setuid,
+  capability setgid,
+  capability chown,
+  capability dac_override,
+  capability dac_read_search,
+}

@@ -4,7 +4,12 @@
 # Upstream installation reference:
 # https://docs.triliumnotes.org/user-guide/setup/server/installation/docker
 ARG TRILIUM_VERSION=v0.103.0
+ARG BUILD_VERSION=1.0.0
+ARG BUILD_ARCH=amd64
 FROM triliumnext/trilium:${TRILIUM_VERSION}
+
+ARG BUILD_VERSION
+ARG BUILD_ARCH
 
 # jq is used by run.sh to read the add-on options set from the Home Assistant UI
 # (stored by the Supervisor in /data/options.json).
@@ -12,12 +17,15 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends jq \
     && rm -rf /var/lib/apt/lists/*
 
-# Store the Trilium document/data files inside the add-on's persistent /data
-# folder, which the Supervisor keeps across restarts and add-on updates.
-ENV TRILIUM_DATA_DIR=/data/trilium-data
-
 COPY run.sh /run.sh
 RUN chmod a+x /run.sh
+
+# Labels help the Home Assistant Supervisor identify the add-on image when it is
+# not built through the official GitHub builder actions.
+LABEL \
+  io.hass.version="${BUILD_VERSION}" \
+  io.hass.type="app" \
+  io.hass.arch="${BUILD_ARCH}"
 
 # The upstream image already runs "docker-entrypoint.sh sh ./start-docker.sh"
 # as its own ENTRYPOINT/CMD (see start-docker.sh, which handles USER_UID/

@@ -1,0 +1,100 @@
+name: Sync Trilium release
+
+on:
+  schedule:
+    - cron: "23 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: sync-trilium-release
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Create update pull request
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Update pinned Trilium version
+        id: update
+        working-directory: trilium_notes
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          release_json="$(curl --fail-with-body --retry 3 --retry-all-errors \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            "https://api.github.com/repos/TriliumNext/Trilium/releases/latest")"
+          trilium_version="$(jq -r '.tag_name' <<<"${release_json}")"
+
+          if [[ ! "${trilium_version}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Unexpected stable release tag: ${trilium_version}" >&2
+            exit 1
+          fi
+
+          current_version="$(sed -nE 's/^ARG TRILIUM_VERSION=(.+)$/\1/p' \
+            Dockerfile)"
+          if [ "${trilium_version}" = "${current_version}" ]; then
+            echo "changed=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+
+          python3 - "${trilium_version}" <<'PY'
+          from pathlib import Path
+          import re
+          import sys
+
+          trilium_version = sys.argv[1]
+          dockerfile = Path("Dockerfile")
+          config = Path("config.yaml")
+
+          dockerfile.write_text(
+              re.sub(
+                  r"^ARG TRILIUM_VERSION=.+$",
+                  f"ARG TRILIUM_VERSION={trilium_version}",
+                  dockerfile.read_text(),
+                  flags=re.MULTILINE,
+              )
+          )
+
+          config_text = config.read_text()
+          match = re.search(r'^version: "(\d+)\.(\d+)\.(\d+)"$', config_text, re.MULTILINE)
+          if not match:
+              raise SystemExit("config.yaml has no supported x.y.z add-on version")
+          major, minor, patch = map(int, match.groups())
+          addon_version = f'{major}.{minor}.{patch + 1}'
+          config.write_text(
+              config_text[:match.start()]
+              + f'version: "{addon_version}"'
+              + config_text[match.end():]
+          )
+          print(f"addon_version={addon_version}")
+          PY
+
+          addon_version="$(sed -nE 's/^version: "(.+)"$/\1/p' \
+            config.yaml)"
+          echo "changed=true" >> "${GITHUB_OUTPUT}"
+          echo "trilium_version=${trilium_version}" >> "${GITHUB_OUTPUT}"
+          echo "addon_version=${addon_version}" >> "${GITHUB_OUTPUT}"
+
+      - name: Create pull request
+        if: steps.update.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: automation/trilium-release
+          delete-branch: true
+          commit-message: "chore: update Trilium to ${{ steps.update.outputs.trilium_version }}"
+          title: "chore: update Trilium to ${{ steps.update.outputs.trilium_version }}"
+          body: |
+            Automated update from the latest stable
+            [Trilium release](https://github.com/TriliumNext/Trilium/releases/tag/${{ steps.update.outputs.trilium_version }}).
+
+            The add-on version is incremented to `${{ steps.update.outputs.addon_version }}`.
