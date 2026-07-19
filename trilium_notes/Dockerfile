@@ -13,9 +13,8 @@ ARG BUILD_ARCH
 
 # jq is used by run.sh to read the add-on options set from the Home Assistant UI
 # (stored by the Supervisor in /data/options.json).
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends jq \
-    && rm -rf /var/lib/apt/lists/*
+# The upstream image is Alpine-based, so use apk instead of apt-get.
+RUN apk add --no-cache jq
 
 COPY run.sh /run.sh
 RUN chmod a+x /run.sh
