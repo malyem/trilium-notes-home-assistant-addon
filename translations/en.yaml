@@ -1,0 +1,9 @@
+configuration:
+  user_uid:
+    name: "User UID"
+    description: "Linux user ID used to own the Trilium data files stored on disk. Matches the upstream image's USER_UID environment variable."
+  user_gid:
+    name: "User GID"
+    description: "Linux group ID used to own the Trilium data files stored on disk. Matches the upstream image's USER_GID environment variable."
+network:
+  8080/tcp: "Web interface"

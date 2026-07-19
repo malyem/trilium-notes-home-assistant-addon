@@ -1,0 +1,26 @@
+---
+name: "Trilium Notes"
+version: "0.103.0"
+slug: "trilium_notes"
+description: "Self-hosted hierarchical note-taking application with note versioning, encryption, note attributes and more."
+url: "https://github.com/TriliumNext/Trilium"
+arch:
+  - amd64
+  - aarch64
+  - armv7
+startup: application
+boot: auto
+init: true
+hassio_api: false
+homeassistant_api: false
+host_network: false
+ports:
+  8080/tcp: 8080
+ports_description:
+  8080/tcp: "Trilium Notes web interface"
+options:
+  user_uid: 1000
+  user_gid: 1000
+schema:
+  user_uid: "int(0,)"
+  user_gid: "int(0,)"
