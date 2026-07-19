@@ -3,7 +3,7 @@
 Run [Trilium Notes](https://github.com/TriliumNext/Trilium), a self-hosted,
 hierarchical note-taking application, from your Home Assistant instance.
 
-[![Add this add-on repository to your Home Assistant instance](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository=https%3A%2F%2Fgithub.com%2Fmalyem%2Ftrilium-notes-home-assistant-addon)
+[![Open your Home Assistant instance and show the add app repository dialog with a specific repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fmalyem%2Ftrilium-notes-home-assistant-addon)
 
 ## Installation
 
