@@ -12,10 +12,19 @@ ARG BUILD_VERSION
 ARG BUILD_ARCH
 
 # jq is used by run.sh to read the add-on options set from the Home Assistant UI
-# (stored by the Supervisor in /data/options.json).
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends jq \
-    && rm -rf /var/lib/apt/lists/*
+# (stored by the Supervisor in /data/options.json). Upstream uses Alpine for
+# amd64 and Debian for the other architectures.
+RUN set -eux; \
+    if command -v apk >/dev/null 2>&1; then \
+        apk add --no-cache jq; \
+    elif command -v apt-get >/dev/null 2>&1; then \
+        apt-get update; \
+        apt-get install -y --no-install-recommends jq; \
+        rm -rf /var/lib/apt/lists/*; \
+    else \
+        echo "Unsupported base image: no supported package manager found" >&2; \
+        exit 1; \
+    fi
 
 COPY run.sh /run.sh
 RUN chmod a+x /run.sh
