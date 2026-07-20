@@ -3,7 +3,7 @@
 #
 # Upstream installation reference:
 # https://docs.triliumnotes.org/user-guide/setup/server/installation/docker
-ARG TRILIUM_VERSION=v0.103.0
+ARG TRILIUM_VERSION=v0.104.0
 ARG BUILD_VERSION=1.0.0
 ARG BUILD_ARCH=amd64
 FROM triliumnext/trilium:${TRILIUM_VERSION}
