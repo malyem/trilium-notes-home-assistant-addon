@@ -1,6 +1,6 @@
 ---
 name: "Trilium Notes"
-version: "1.0.3"
+version: "1.1.0"
 slug: "trilium_notes"
 description: "Self-hosted hierarchical note-taking application with note versioning, encryption, note attributes and more."
 url: "https://github.com/malyem/trilium-notes-home-assistant-addon"
