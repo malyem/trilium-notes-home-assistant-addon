@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.0
+
+- Upgrade to Trilium v0.104.0.
+
 ## 1.0.2
 
 - Add GitHub Actions workflows that detect stable Trilium releases, open an
