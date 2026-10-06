@@ -55,6 +55,7 @@ jobs:
           trilium_version = sys.argv[1]
           dockerfile = Path("Dockerfile")
           config = Path("config.yaml")
+          changelog = Path("CHANGELOG.md")
 
           dockerfile.write_text(
               re.sub(
@@ -71,10 +72,18 @@ jobs:
               raise SystemExit("config.yaml has no supported x.y.z add-on version")
           major, minor, patch = map(int, match.groups())
           addon_version = f'{major}.{minor}.{patch + 1}'
-          config.write_text(
-              config_text[:match.start()]
-              + f'version: "{addon_version}"'
-              + config_text[match.end():]
+          changelog_text = changelog.read_text()
+          changelog_header = "# Changelog\n"
+          if not changelog_text.startswith(changelog_header):
+              raise SystemExit("CHANGELOG.md has no supported Changelog header")
+
+          config.write_text(config_text[:match.start()]
+                            + f'version: "{addon_version}"'
+                            + config_text[match.end():])
+          changelog.write_text(
+              changelog_header
+              + f"\n## {addon_version}\n\n- Upgrade to Trilium {trilium_version}.\n"
+              + changelog_text[len(changelog_header):]
           )
           print(f"addon_version={addon_version}")
           PY
