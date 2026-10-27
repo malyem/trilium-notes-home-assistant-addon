@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.4
+
+- Upgrade to Trilium v0.106.1.
+
 ## 1.1.2
 
 - Upgrade to Trilium v0.105.0
